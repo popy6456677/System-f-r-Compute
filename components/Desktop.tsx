@@ -1,10 +1,11 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { WindowType, WindowInstance, DesktopAppConfig } from '../types';
+import { WindowType, WindowInstance, DesktopItem, DesktopIconItem, DesktopStackItem, AppConfig } from '../types';
 import DesktopIcon from './DesktopIcon';
 import Window from './Window';
 import SStore from './MStore';
 import GameStore from './GameStore';
+import ShutdownMenu from './ShutdownMenu';
 import { StoreIcon, GamepadIcon, VideoEditorIcon, CalculatorIcon, NotesIcon, PaintIcon, SystemLogoIcon, WifiIcon, BluetoothIcon, EraserIcon, BrushIcon, AirplaneIcon, RacingIcon, BusSimulatorIcon, PersonIcon, FolderIcon, BrowserIcon, PlusIcon, SettingsIcon } from './icons';
 
 // --- Application Components ---
@@ -194,37 +195,90 @@ const Settings: React.FC = () => (
     </div>
 );
 
+const StackPopover: React.FC<{
+  stack: DesktopStackItem;
+  onClose: () => void;
+  onAppClick: (appId: WindowType) => void;
+}> = ({ stack, onClose, onAppClick }) => {
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
+  
+  return (
+    <div ref={popoverRef} className="fixed bg-gray-800/80 backdrop-blur-lg border border-white/10 rounded-lg shadow-2xl p-4 flex flex-col z-[1001] animate-scaleIn" style={{ top: stack.position.y + 20, left: stack.position.x + 20 }}>
+      <h4 className="text-white font-bold mb-3 px-2">Stack</h4>
+      <div className="grid grid-cols-3 gap-2">
+        {stack.items.map(app => (
+          <button key={app.id} onClick={() => onAppClick(app.id)} className="flex flex-col items-center justify-start space-y-1 w-24 h-24 p-2 rounded-lg hover:bg-white/10 transition-colors">
+            <div className="text-white w-10 h-10">{app.icon}</div>
+            <span className="text-white text-xs text-center truncate w-full">{app.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 
 // --- Desktop Component ---
 
-const ALL_APPS: WindowType[] = [
+const ALL_INSTALLED_APPS: WindowType[] = [
     'sstore', 'gamestore', 'editor', 'calculator', 'notes', 'paint', 
     'racing', 'bussimulator', 'fileexplorer', 'browser', 'settings'
 ];
 
-const APP_DATA = [
-    { id: 'sstore' as WindowType, label: 'MStore', icon: <StoreIcon /> },
-    { id: 'gamestore' as WindowType, label: 'GameStore', icon: <GamepadIcon /> },
-    { id: 'editor' as WindowType, label: 'Editor', icon: <VideoEditorIcon /> },
-    { id: 'calculator' as WindowType, label: 'Calculator', icon: <CalculatorIcon /> },
-    { id: 'notes' as WindowType, label: 'Notes', icon: <NotesIcon /> },
-    { id: 'paint' as WindowType, label: 'Paint', icon: <PaintIcon /> },
-    { id: 'racing' as WindowType, label: 'Racing', icon: <RacingIcon /> },
-    { id: 'bussimulator' as WindowType, label: 'Bus Simulator', icon: <BusSimulatorIcon /> },
-    { id: 'fileexplorer' as WindowType, label: 'File Explorer', icon: <FolderIcon /> },
-    { id: 'browser' as WindowType, label: 'Browser', icon: <BrowserIcon /> },
-    { id: 'settings' as WindowType, label: 'Settings', icon: <SettingsIcon /> },
+const APP_CONFIGS: AppConfig[] = [
+    { id: 'sstore', label: 'MStore', icon: <StoreIcon /> },
+    { id: 'gamestore', label: 'GameStore', icon: <GamepadIcon /> },
+    { id: 'editor', label: 'Editor', icon: <VideoEditorIcon /> },
+    { id: 'calculator', label: 'Calculator', icon: <CalculatorIcon /> },
+    { id: 'notes', label: 'Notes', icon: <NotesIcon /> },
+    { id: 'paint', label: 'Paint', icon: <PaintIcon /> },
+    { id: 'racing', label: 'Racing', icon: <RacingIcon /> },
+    { id: 'bussimulator', label: 'Bus Simulator', icon: <BusSimulatorIcon /> },
+    { id: 'fileexplorer', label: 'File Explorer', icon: <FolderIcon /> },
+    { id: 'browser', label: 'Browser', icon: <BrowserIcon /> },
+    { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
 ];
 
-const Desktop: React.FC = () => {
+const checkCollision = (itemA: DesktopItem, itemB: DesktopItem): boolean => {
+    const boxA = { x: itemA.position.x, y: itemA.position.y, width: 96, height: 96 };
+    const boxB = { x: itemB.position.x, y: itemB.position.y, width: 96, height: 96 };
+
+    return (
+        boxA.x < boxB.x + boxB.width &&
+        boxA.x + boxA.width > boxB.x &&
+        boxA.y < boxB.y + boxB.height &&
+        boxA.y + boxA.height > boxB.y
+    );
+}
+
+interface DesktopProps {
+  onShutdown: () => void;
+  onRestart: () => void;
+}
+
+const Desktop: React.FC<DesktopProps> = ({ onShutdown, onRestart }) => {
   const [windows, setWindows] = useState<WindowInstance[]>([]);
-  const [desktopApps, setDesktopApps] = useState<DesktopAppConfig[]>([]);
+  const [desktopItems, setDesktopItems] = useState<DesktopItem[]>([]);
   const [nextWindowId, setNextWindowId] = useState(0);
   const [maxZIndex, setMaxZIndex] = useState(100);
-  const [installedApps, setInstalledApps] = useState<Set<WindowType>>(new Set(ALL_APPS));
+  const [installedApps, setInstalledApps] = useState<Set<WindowType>>(new Set(ALL_INSTALLED_APPS));
   const [time, setTime] = useState(new Date());
+  const [openStackId, setOpenStackId] = useState<string | null>(null);
+  const [isShutdownMenuOpen, setShutdownMenuOpen] = useState(false);
   
-  const draggedAppIdRef = useRef<WindowType | null>(null);
+  const draggedItemIdRef = useRef<WindowType | string | null>(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const hasDraggedRef = useRef(false);
 
@@ -234,102 +288,105 @@ const Desktop: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    let initialApps: DesktopAppConfig[];
+    let initialItems: DesktopItem[];
     try {
-      const savedApps = localStorage.getItem('desktopIconPositions');
-      const installed = installedApps; // In a real OS, this would be loaded too
-      const currentAppIds = new Set(APP_DATA.map(a => a.id));
+      const savedData = localStorage.getItem('desktopItems');
+      if (savedData) {
+        initialItems = JSON.parse(savedData).map((item: any) => {
+          if (item.items) { // It's a stack
+             return {
+                ...item,
+                items: item.items.map((app: any) => ({...app, icon: APP_CONFIGS.find(c => c.id === app.id)?.icon }))
+             }
+          }
+          return {...item, icon: APP_CONFIGS.find(c => c.id === item.id)?.icon };
+        });
 
-      if (savedApps) {
-        let savedPositions: Record<string, {x: number, y: number}> = JSON.parse(savedApps);
-        
-        // Filter out uninstalled apps from saved positions
-        savedPositions = Object.keys(savedPositions)
-          .filter(key => currentAppIds.has(key as WindowType))
-          .reduce((obj, key) => {
-            obj[key] = savedPositions[key];
-            return obj;
-          }, {} as Record<string, {x: number, y: number}>);
-
-        initialApps = APP_DATA.filter(app => installed.has(app.id)).map((app, index) => ({
-          ...app,
-          position: savedPositions[app.id] || { x: 16 + Math.floor(index / 10) * 112, y: 16 + (index % 10) * 104 },
-        }));
       } else {
-        throw new Error("No saved positions");
+        const savedPositionsData = localStorage.getItem('desktopIconPositions');
+        if (savedPositionsData) { // Migration from old format
+            const savedPositions = JSON.parse(savedPositionsData);
+            initialItems = APP_CONFIGS.filter(app => installedApps.has(app.id)).map(app => ({
+                ...app,
+                position: savedPositions[app.id] || { x: 16, y: 16 },
+            }));
+            localStorage.removeItem('desktopIconPositions');
+        } else {
+          throw new Error("No saved positions");
+        }
       }
     } catch (e) {
-      initialApps = APP_DATA.filter(app => installedApps.has(app.id)).map((app, index) => ({
+      initialItems = APP_CONFIGS.filter(app => installedApps.has(app.id)).map((app, index) => ({
         ...app,
         position: {
-          x: 16 + Math.floor(index / 10) * 112, // 1rem + col * (width + gap)
-          y: 16 + (index % 10) * 104,      // 1rem + row * (height + gap)
+          x: 16 + Math.floor(index / 8) * 112,
+          y: 16 + (index % 8) * 104,
         },
       }));
     }
-    setDesktopApps(initialApps);
+    setDesktopItems(initialItems);
   }, [installedApps]);
   
   useEffect(() => {
-    if (desktopApps.length > 0) {
-      const positionsToSave = desktopApps.reduce((acc, app) => {
-        acc[app.id] = app.position;
-        return acc;
-      }, {} as Record<string, { x: number; y: number }>);
-      localStorage.setItem('desktopIconPositions', JSON.stringify(positionsToSave));
+    if (desktopItems.length > 0) {
+        const itemsToSave = desktopItems.map(item => {
+             if ('items' in item) {
+                return { ...item, items: item.items.map(({icon, ...rest}) => rest) };
+             }
+             const { icon, ...rest } = item;
+             return rest;
+        });
+      localStorage.setItem('desktopItems', JSON.stringify(itemsToSave));
     }
-  }, [desktopApps]);
+  }, [desktopItems]);
 
 
-  const handleIconMouseDown = useCallback((e: React.MouseEvent, appId: WindowType) => {
+  const handleIconMouseDown = useCallback((e: React.MouseEvent, itemId: WindowType | string) => {
     e.preventDefault();
     e.stopPropagation();
+    if(openStackId) setOpenStackId(null);
 
-    draggedAppIdRef.current = appId;
+    draggedItemIdRef.current = itemId;
     hasDraggedRef.current = false;
     
-    const app = desktopApps.find(a => a.id === appId);
-    if(app) {
+    const item = desktopItems.find(i => i.id === itemId);
+    if(item) {
         dragOffsetRef.current = {
-            x: e.clientX - app.position.x,
-            y: e.clientY - app.position.y
+            x: e.clientX - item.position.x,
+            y: e.clientY - item.position.y
         };
     }
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-  }, [desktopApps]);
+  }, [desktopItems, openStackId]);
   
   const handleMouseMove = useCallback((e: MouseEvent) => {
     e.preventDefault();
-    hasDraggedRef.current = true;
-    if (!draggedAppIdRef.current) return;
+    if (!draggedItemIdRef.current) return;
+    
+    if(!hasDraggedRef.current) { // Only set hasDragged on first move
+        const item = desktopItems.find(i => i.id === draggedItemIdRef.current);
+        const initialX = item?.position.x ?? 0;
+        const initialY = item?.position.y ?? 0;
+        if(Math.abs(e.clientX - (initialX + dragOffsetRef.current.x)) > 5 || Math.abs(e.clientY - (initialY + dragOffsetRef.current.y)) > 5) {
+            hasDraggedRef.current = true;
+        }
+    }
     
     const newX = e.clientX - dragOffsetRef.current.x;
     const newY = e.clientY - dragOffsetRef.current.y;
 
-    setDesktopApps(prev =>
-      prev.map(app =>
-        app.id === draggedAppIdRef.current
-          ? { ...app, position: { x: newX, y: newY } }
-          : app
+    setDesktopItems(prev =>
+      prev.map(item =>
+        item.id === draggedItemIdRef.current
+          ? { ...item, position: { x: newX, y: newY } }
+          : item
       )
     );
   }, []);
 
-  const handleMouseUp = useCallback((e: MouseEvent) => {
-    window.removeEventListener('mousemove', handleMouseMove);
-    window.removeEventListener('mouseup', handleMouseUp);
-
-    if (draggedAppIdRef.current && !hasDraggedRef.current) {
-        openWindow(draggedAppIdRef.current, e as unknown as React.MouseEvent);
-    }
-    draggedAppIdRef.current = null;
-  }, [handleMouseMove]);
-
-
-  const openWindow = useCallback((type: WindowType, event: React.MouseEvent) => {
-    event.stopPropagation();
+  const openWindow = useCallback((type: WindowType) => {
     const existingWindow = windows.find(win => win.type === type);
     if(existingWindow) {
         focusWindow(existingWindow.id);
@@ -348,6 +405,69 @@ const Desktop: React.FC = () => {
     setWindows(prev => [...prev, newWindow]);
   }, [windows, nextWindowId, maxZIndex]);
 
+
+  const handleMouseUp = useCallback((e: MouseEvent) => {
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('mouseup', handleMouseUp);
+    
+    const draggedId = draggedItemIdRef.current;
+    if (!draggedId) return;
+
+    if (!hasDraggedRef.current) {
+        // This was a click, not a drag
+        const item = desktopItems.find(i => i.id === draggedId);
+        if (item) {
+            if ('items' in item) { // is stack
+                setOpenStackId(item.id);
+            } else { // is icon
+                openWindow(item.id as WindowType);
+            }
+        }
+    } else {
+        // This was a drag, check for stacking
+        const draggedItem = desktopItems.find(i => i.id === draggedId);
+        if (!draggedItem || 'items' in draggedItem) { // can't drag stacks into other things for now
+            draggedItemIdRef.current = null;
+            return;
+        }
+
+        const targetItem = desktopItems.find(item => {
+            if (item.id === draggedId) return false;
+            return checkCollision(draggedItem, item);
+        });
+
+        if (targetItem) {
+            setDesktopItems(currentItems => {
+                const newItems = currentItems.filter(i => i.id !== draggedId);
+                const targetIndex = newItems.findIndex(i => i.id === targetItem.id);
+                const draggedAppConfig = APP_CONFIGS.find(app => app.id === draggedItem.id);
+                if (!draggedAppConfig) return currentItems;
+
+
+                if (targetIndex > -1 && 'items' in newItems[targetIndex]) { // Target is a stack
+                    const targetStack = newItems[targetIndex] as DesktopStackItem;
+                    targetStack.items.push(draggedAppConfig);
+                    newItems[targetIndex] = targetStack;
+                } else if (targetIndex > -1) { // Target is an icon, create new stack
+                    const targetIcon = newItems[targetIndex] as DesktopIconItem;
+                    const targetAppConfig = APP_CONFIGS.find(app => app.id === targetIcon.id);
+                    if (!targetAppConfig) return currentItems;
+
+                    const newStack: DesktopStackItem = {
+                        id: `stack-${Date.now()}`,
+                        items: [ targetAppConfig, draggedAppConfig ],
+                        position: targetIcon.position,
+                    };
+                    newItems.splice(targetIndex, 1, newStack);
+                }
+                return newItems;
+            });
+        }
+    }
+
+    draggedItemIdRef.current = null;
+  }, [desktopItems, handleMouseMove, openWindow]);
+
   const closeWindow = useCallback((id: number) => {
     setWindows(prev => prev.filter(win => win.id !== id));
   }, []);
@@ -357,11 +477,22 @@ const Desktop: React.FC = () => {
       setMaxZIndex(prev => prev + 1);
   }, [maxZIndex]);
 
-  const handleInstallApp = useCallback((app: WindowType) => {
+  const handleInstallApp = useCallback((appId: WindowType) => {
     setTimeout(() => {
-        setInstalledApps(prev => new Set(prev).add(app));
+        setInstalledApps(prev => {
+            const newSet = new Set(prev);
+            newSet.add(appId);
+            const appConfig = APP_CONFIGS.find(a => a.id === appId);
+            if (appConfig && !desktopItems.find(i => i.id === appId)) {
+                setDesktopItems(prevItems => [...prevItems, {
+                    ...appConfig,
+                    position: { x: 16, y: 16 }
+                }]);
+            }
+            return newSet;
+        });
     }, 1500); // Simulate download time
-  }, []);
+  }, [desktopItems]);
 
   const renderWindowContent = (type: WindowType) => {
     switch (type) {
@@ -381,26 +512,39 @@ const Desktop: React.FC = () => {
   };
 
   const getWindowTitle = (type: WindowType) => {
-      const app = APP_DATA.find(a => a.id === type);
+      const app = APP_CONFIGS.find(a => a.id === type);
       return app ? app.label : 'Application';
   }
+  
+  const openStackApp = (appId: WindowType) => {
+    openWindow(appId);
+    setOpenStackId(null);
+  };
 
   return (
     <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: 'url(https://picsum.photos/seed/systemx80desktop/1920/1080)' }}>
       <main className="h-full w-full relative">
         {/* Desktop Icons */}
         <div className="p-4 h-full w-full">
-          {desktopApps.map((app) => (
+          {desktopItems.map((item) => (
             <DesktopIcon
-              key={app.id}
-              label={app.label}
-              icon={app.icon}
-              position={app.position}
-              onMouseDown={(e) => handleIconMouseDown(e, app.id)}
-              isDragging={draggedAppIdRef.current === app.id}
+              key={item.id}
+              item={item}
+              onMouseDown={(e) => handleIconMouseDown(e, item.id)}
+              isDragging={draggedItemIdRef.current === item.id}
             />
           ))}
         </div>
+
+        {/* Stack Popover */}
+        {openStackId && (
+            <StackPopover 
+                stack={desktopItems.find(i => i.id === openStackId) as DesktopStackItem}
+                onClose={() => setOpenStackId(null)}
+                onAppClick={openStackApp}
+            />
+        )}
+
 
         {/* Windows */}
         {windows.map(win => (
@@ -420,10 +564,21 @@ const Desktop: React.FC = () => {
 
       {/* Taskbar */}
       <footer className="absolute bottom-0 left-0 right-0 h-12 bg-gray-900/50 backdrop-blur-lg border-t border-white/10 flex items-center justify-between px-4">
-        <div className="flex items-center space-x-2">
-            <button className="w-10 h-10 p-2 text-cyan-400 hover:bg-white/10 rounded-md">
+        <div className="flex items-center space-x-2 relative">
+            <button 
+                onClick={() => setShutdownMenuOpen(prev => !prev)}
+                className="w-10 h-10 p-2 text-cyan-400 hover:bg-white/10 rounded-md transition-colors"
+                aria-label="Start Menu"
+            >
                 <SystemLogoIcon />
             </button>
+            {isShutdownMenuOpen && (
+                <ShutdownMenu 
+                    onShutdown={onShutdown} 
+                    onRestart={onRestart} 
+                    onClose={() => setShutdownMenuOpen(false)} 
+                />
+            )}
         </div>
         <div className="flex items-center space-x-4 text-white text-sm">
             <span>{time.toLocaleTimeString()}</span>

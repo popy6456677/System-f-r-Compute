@@ -17,9 +17,22 @@ export interface WindowInstance {
     size: { width: number, height: number };
 }
 
-export interface DesktopAppConfig {
-  id: WindowType;
-  label: string;
-  icon: React.ReactNode;
-  position: { x: number; y: number };
+// An app has these core properties.
+export interface AppConfig {
+    id: WindowType;
+    label: string;
+    icon: React.ReactNode;
 }
+
+// A desktop item can be an icon or a stack.
+export interface DesktopIconItem extends AppConfig {
+    position: { x: number; y: number };
+}
+
+export interface DesktopStackItem {
+    id: string; // Unique stack ID
+    items: AppConfig[];
+    position: { x: number; y: number };
+}
+
+export type DesktopItem = DesktopIconItem | DesktopStackItem;

@@ -36,6 +36,14 @@ const App: React.FC = () => {
     setBootState(BootState.DESKTOP);
   };
 
+  const handleShutdown = () => {
+    setBootState(BootState.IDLE);
+  }
+
+  const handleRestart = () => {
+    setBootState(BootState.PRODUCTION_LOGO);
+  }
+
   const renderIdleScreen = () => (
     <div 
         className="w-full h-full bg-cover bg-center relative flex justify-center items-center" 
@@ -84,7 +92,7 @@ const App: React.FC = () => {
       case BootState.PORTAL:
         return <PortalScreen onEnterDesktop={handleEnterDesktop} />;
       case BootState.DESKTOP:
-        return <Desktop />;
+        return <Desktop onShutdown={handleShutdown} onRestart={handleRestart} />;
       default:
         return renderIdleScreen();
     }
