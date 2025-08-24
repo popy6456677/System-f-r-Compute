@@ -1,0 +1,5 @@
+{
+  "name": "System X80",
+  "description": "A simulation of the System X80 operating system, featuring a boot sequence, a desktop environment with a Start Menu, draggable windows, and pre-installed applications.",
+  "requestFramePermissions": []
+}
