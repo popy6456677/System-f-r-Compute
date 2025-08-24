@@ -10,65 +10,124 @@ export const SystemLogoIcon: React.FC = () => (
 );
 
 export const StoreIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.658-.463 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="storeGradient" x1="32" y1="8" x2="32" y2="56" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#06B6D4"/>
+                <stop offset="1" stopColor="#3B82F6"/>
+            </linearGradient>
+        </defs>
+        <path d="M12 20H52L48 56H16L12 20Z" fill="url(#storeGradient)"/>
+        <path d="M24 28V16C24 11.5817 27.5817 8 32 8C36.4183 8 40 11.5817 40 16V28" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
 
 export const GamepadIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2 12c-1.104 0-2 .896-2 2v4c0 1.104.896 2 2 2h14c1.104 0 2-.896 2-2v-4c0-1.104-.896-2-2-2H2zm14-4h-2V6c0-1.104-.896-2-2-2H8C6.896 4 6 4.896 6 6v2H4c-1.104 0-2 .896-2 2v2h2v-2h2v2h8v-2h2v2h2v-2c0-1.104-.896-2-2-2zM8 8V6h8v2H8z" transform="translate(2 2)" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12v4m-2-2h4m6-2h4m-2 2v-4" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <radialGradient id="gamepadGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(32 32) rotate(90) scale(32)">
+                <stop stopColor="#22D3EE"/>
+                <stop offset="1" stopColor="#22D3EE" stopOpacity="0"/>
+            </radialGradient>
+        </defs>
+        <path d="M16 20C8.26801 20 2 26.268 2 34V42C2 49.732 8.26801 56 16 56H48C55.732 56 62 49.732 62 42V34C62 26.268 55.732 20 48 20H16Z" fill="#27272A"/>
+        <path d="M14 32H26M20 26V38" stroke="#06B6D4" strokeWidth="4" strokeLinecap="round"/>
+        <circle cx="42" cy="30" r="4" fill="#06B6D4"/>
+        <circle cx="50" cy="38" r="4" fill="#06B6D4"/>
+        <rect x="25" y="12" width="14" height="20" rx="4" fill="#18181B"/>
     </svg>
 );
 
 export const VideoEditorIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 20.25h12m-7.5-3.75v3.75m-3.75-3.75v3.75m-1.5-15h13.5M21 7.5v12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 19.5V7.5M21 7.5c0-1.243-1.007-2.25-2.25-2.25H5.25C4.007 5.25 3 6.257 3 7.5M9 11.25h6M9 15h2.25" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 4H44L52 12V60H12V4Z" fill="#F9FAFB"/>
+        <path d="M44 4L52 12H44V4Z" fill="#E5E7EB"/>
+        <path d="M20 24H44" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M20 34H44" stroke="#9CA3AF" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M20 44H36" stroke="#9CA3AF" strokeWidth="3" strokeLinecap="round"/>
     </svg>
 );
 
+
 export const CalculatorIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 3h.008v.008H8.25v-.008zm0 3h.008v.008H8.25v-.008zm3-6h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm3-6h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zM4.5 6.75h15v10.5h-15V6.75z" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="64" height="64" rx="12" fill="#374151"/>
+        <rect x="8" y="8" width="48" height="16" rx="4" fill="#111827"/>
+        <circle cx="18" cy="34" r="5" fill="#4B5563"/>
+        <circle cx="32" cy="34" r="5" fill="#4B5563"/>
+        <circle cx="46" cy="34" r="5" fill="#4B5563"/>
+        <circle cx="18" cy="48" r="5" fill="#4B5563"/>
+        <circle cx="32" cy="48" r="5" fill="#4B5563"/>
+        <circle cx="46" cy="48" r="5" fill="#06B6D4"/>
     </svg>
 );
 
 export const NotesIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 4H48V60H8V4Z" fill="#FBBF24"/>
+        <path d="M8 4H40" stroke="#F87171" strokeWidth="4" strokeLinecap="round"/>
+        <rect x="16" y="12" width="8" height="4" rx="2" fill="#374151"/>
+        <path d="M16 24H40" stroke="#4B5563" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M16 34H40" stroke="#4B5563" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M16 44H32" stroke="#4B5563" strokeWidth="3" strokeLinecap="round"/>
     </svg>
 );
 
 export const PaintIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.712c.44.44.44 1.152 0 1.59l-2.88 2.88m-7.5 7.5h3.75m-1.5-1.5l-1.5-1.5m-1.5 1.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32 4C14.3269 4 4 14.3269 4 32C4 44.4087 15.6599 56.5502 24 60C36 52 40.2312 48.2435 46 46C56 42 60 22 48 12C42 7 36 4 32 4Z" fill="#6B46C1"/>
+        <circle cx="44" cy="20" r="6" fill="#F87171"/>
+        <circle cx="28" cy="18" r="5" fill="#34D399"/>
+        <circle cx="22" cy="34" r="7" fill="#FBBF24"/>
+        <circle cx="38" cy="38" r="8" fill="#3B82F6"/>
     </svg>
 );
 
 export const FolderIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.75h16.5m-16.5 0A2.25 2.25 0 015.25 7.5h5.376a2.25 2.25 0 011.841 1.22l.53 1.06h5.233c.828 0 1.5.672 1.5 1.5v6a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-6.75z" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="folderGradient" x1="32" y1="14" x2="32" y2="52" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#60A5FA"/>
+                <stop offset="1" stopColor="#3B82F6"/>
+            </linearGradient>
+        </defs>
+        <path d="M4 20C4 16.6863 6.68629 14 10 14H24L30 20H54C57.3137 20 60 22.6863 60 26V48C60 51.3137 57.3137 54 54 54H10C6.68629 54 4 51.3137 4 48V20Z" fill="url(#folderGradient)"/>
     </svg>
 );
 
 export const BrowserIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3.75c-3.142 0-6 2.05-6 4.5s2.858 4.5 6 4.5c3.142 0 6-2.05 6-4.5S15.142 3.75 12 3.75z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="browserGradient" x1="32" y1="0" x2="32" y2="64" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#F43F5E"/>
+                <stop offset="0.5" stopColor="#3B82F6"/>
+                <stop offset="1" stopColor="#FBBF24"/>
+            </linearGradient>
+        </defs>
+        <circle cx="32" cy="32" r="28" stroke="url(#browserGradient)" strokeWidth="8"/>
+        <circle cx="32" cy="32" r="12" fill="#F9FAFB"/>
     </svg>
 );
 
 export const RacingIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5m1.5 15V4.5" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="28" height="28" fill="#F9FAFB"/>
+        <rect x="32" y="32" width="28" height="28" fill="#F9FAFB"/>
+        <rect x="32" y="4" width="28" height="28" fill="#111827"/>
+        <rect x="4" y="32" width="28" height="28" fill="#111827"/>
+        <path d="M4 60L60 4" stroke="#EF4444" strokeWidth="6" strokeLinecap="round"/>
     </svg>
 );
 
+
 export const BusSimulatorIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5h10.5a1.125 1.125 0 001.125-1.125v-6.625a1.125 1.125 0 00-1.125-1.125H6.375a1.125 1.125 0 00-1.125 1.125v6.625a1.125 1.125 0 001.125 1.125z" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="8" width="56" height="48" rx="12" fill="#FBBF24"/>
+        <rect x="10" y="20" width="44" height="24" rx="4" fill="#111827"/>
+        <circle cx="18" cy="52" r="6" fill="#27272A"/>
+        <circle cx="46" cy="52" r="6" fill="#27272A"/>
+        <path d="M4 28H8" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+        <path d="M56 28H60" stroke="white" strokeWidth="4" strokeLinecap="round"/>
     </svg>
 );
 
@@ -120,8 +179,24 @@ export const PlusIcon: React.FC = () => (
 );
 
 export const SettingsIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-1.003 1.11-1.226.55-.223 1.157-.223 1.707 0 .55.223 1.02.684 1.11 1.226l.094.542c.063.372.285.696.583.906.298.21.65.327 1.013.327h.542c.57 0 1.08.368 1.25.907.17.54-.055 1.157-.592 1.486l-.542.33c-.32.195-.55.512-.63.873-.08.36-.042.743.1 1.08l.33.542c.33.537.413 1.193.223 1.747s-.73 1.02-1.29 1.11l-.542.094c-.372.063-.696.285-.906.583-.21.298-.327.65-.327 1.013v.542c0 .57-.368 1.08-.907 1.25s-1.157.055-1.486-.592l-.33-.542c-.195-.32-.512-.55-.873-.63-.36-.08-.743-.042-1.08.1l-.542.33c-.537.33-1.193.413-1.747.223s-1.02-.73-1.11-1.29l-.094-.542c-.063-.372-.285-.696-.583-.906-.298-.21-.65-.327-1.013-.327h-.542c-.57 0-1.08-.368-1.25-.907-.17-.54.055-1.157.592-1.486l.542-.33c.32-.195.55-.512.63-.873.08-.36.042-.743-.1-1.08l-.33-.542c-.33-.537-.413-1.193-.223-1.747.19-.557.73-1.02 1.29-1.11l.542-.094c.372-.063.696-.285.906-.583.21-.298.327-.65.327-1.013v-.542c0-.57.368-1.08.907-1.25.54-.17 1.157.055 1.486.592l.33.542c.195.32.512.55.873.63.36.08.743.042 1.08-.1l.542-.33zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="gearGradient" x1="32" y1="4" x2="32" y2="60" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#9CA3AF"/>
+                <stop offset="1" stopColor="#4B5563"/>
+            </linearGradient>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+        <path d="M32 18C28.6863 18 26 20.6863 26 24C26 27.3137 28.6863 30 32 30V40C28.6863 40 26 42.6863 26 46C26 49.3137 28.6863 52 32 52C35.3137 52 38 49.3137 38 46C38 42.6863 35.3137 40 32 40V30C35.3137 30 38 27.3137 38 24C38 20.6863 35.3137 18 32 18Z" fill="url(#gearGradient)"/>
+        <path d="M51.5147 22.4853L48 26L42 20L45.5147 16.4853C47.0773 14.9227 49.5227 14.9227 51.0853 16.4853L51.5147 16.9147C53.0773 18.4773 53.0773 20.9227 51.5147 22.4853Z" fill="url(#gearGradient)"/>
+        <path d="M12.4853 41.5147L16 38L22 44L18.4853 47.5147C16.9227 49.0773 14.4773 49.0773 12.9147 47.5147L12.4853 47.0853C10.9227 45.5227 10.9227 43.0773 12.4853 41.5147Z" fill="url(#gearGradient)"/>
+        <circle cx="32" cy="32" r="8" fill="#06B6D4" filter="url(#glow)"/>
     </svg>
 );
 

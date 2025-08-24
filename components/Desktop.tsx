@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { WindowType, WindowInstance } from '../types';
+import { WindowType, WindowInstance, DesktopAppConfig } from '../types';
 import DesktopIcon from './DesktopIcon';
 import Window from './Window';
 import SStore from './MStore';
@@ -202,7 +202,7 @@ const ALL_APPS: WindowType[] = [
     'racing', 'bussimulator', 'fileexplorer', 'browser', 'settings'
 ];
 
-const DESKTOP_APPS = [
+const APP_DATA = [
     { id: 'sstore' as WindowType, label: 'MStore', icon: <StoreIcon /> },
     { id: 'gamestore' as WindowType, label: 'GameStore', icon: <GamepadIcon /> },
     { id: 'editor' as WindowType, label: 'Editor', icon: <VideoEditorIcon /> },
@@ -218,15 +218,115 @@ const DESKTOP_APPS = [
 
 const Desktop: React.FC = () => {
   const [windows, setWindows] = useState<WindowInstance[]>([]);
+  const [desktopApps, setDesktopApps] = useState<DesktopAppConfig[]>([]);
   const [nextWindowId, setNextWindowId] = useState(0);
   const [maxZIndex, setMaxZIndex] = useState(100);
   const [installedApps, setInstalledApps] = useState<Set<WindowType>>(new Set(ALL_APPS));
   const [time, setTime] = useState(new Date());
+  
+  const draggedAppIdRef = useRef<WindowType | null>(null);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const hasDraggedRef = useRef(false);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    let initialApps: DesktopAppConfig[];
+    try {
+      const savedApps = localStorage.getItem('desktopIconPositions');
+      const installed = installedApps; // In a real OS, this would be loaded too
+      const currentAppIds = new Set(APP_DATA.map(a => a.id));
+
+      if (savedApps) {
+        let savedPositions: Record<string, {x: number, y: number}> = JSON.parse(savedApps);
+        
+        // Filter out uninstalled apps from saved positions
+        savedPositions = Object.keys(savedPositions)
+          .filter(key => currentAppIds.has(key as WindowType))
+          .reduce((obj, key) => {
+            obj[key] = savedPositions[key];
+            return obj;
+          }, {} as Record<string, {x: number, y: number}>);
+
+        initialApps = APP_DATA.filter(app => installed.has(app.id)).map((app, index) => ({
+          ...app,
+          position: savedPositions[app.id] || { x: 16 + Math.floor(index / 10) * 112, y: 16 + (index % 10) * 104 },
+        }));
+      } else {
+        throw new Error("No saved positions");
+      }
+    } catch (e) {
+      initialApps = APP_DATA.filter(app => installedApps.has(app.id)).map((app, index) => ({
+        ...app,
+        position: {
+          x: 16 + Math.floor(index / 10) * 112, // 1rem + col * (width + gap)
+          y: 16 + (index % 10) * 104,      // 1rem + row * (height + gap)
+        },
+      }));
+    }
+    setDesktopApps(initialApps);
+  }, [installedApps]);
+  
+  useEffect(() => {
+    if (desktopApps.length > 0) {
+      const positionsToSave = desktopApps.reduce((acc, app) => {
+        acc[app.id] = app.position;
+        return acc;
+      }, {} as Record<string, { x: number; y: number }>);
+      localStorage.setItem('desktopIconPositions', JSON.stringify(positionsToSave));
+    }
+  }, [desktopApps]);
+
+
+  const handleIconMouseDown = useCallback((e: React.MouseEvent, appId: WindowType) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    draggedAppIdRef.current = appId;
+    hasDraggedRef.current = false;
+    
+    const app = desktopApps.find(a => a.id === appId);
+    if(app) {
+        dragOffsetRef.current = {
+            x: e.clientX - app.position.x,
+            y: e.clientY - app.position.y
+        };
+    }
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  }, [desktopApps]);
+  
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+    hasDraggedRef.current = true;
+    if (!draggedAppIdRef.current) return;
+    
+    const newX = e.clientX - dragOffsetRef.current.x;
+    const newY = e.clientY - dragOffsetRef.current.y;
+
+    setDesktopApps(prev =>
+      prev.map(app =>
+        app.id === draggedAppIdRef.current
+          ? { ...app, position: { x: newX, y: newY } }
+          : app
+      )
+    );
+  }, []);
+
+  const handleMouseUp = useCallback((e: MouseEvent) => {
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('mouseup', handleMouseUp);
+
+    if (draggedAppIdRef.current && !hasDraggedRef.current) {
+        openWindow(draggedAppIdRef.current, e as unknown as React.MouseEvent);
+    }
+    draggedAppIdRef.current = null;
+  }, [handleMouseMove]);
+
 
   const openWindow = useCallback((type: WindowType, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -281,22 +381,23 @@ const Desktop: React.FC = () => {
   };
 
   const getWindowTitle = (type: WindowType) => {
-      const app = DESKTOP_APPS.find(a => a.id === type);
+      const app = APP_DATA.find(a => a.id === type);
       return app ? app.label : 'Application';
   }
 
   return (
     <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: 'url(https://picsum.photos/seed/systemx80desktop/1920/1080)' }}>
-      <main className="h-full w-full">
+      <main className="h-full w-full relative">
         {/* Desktop Icons */}
-        <div className="flex flex-col flex-wrap content-start p-4">
-          {DESKTOP_APPS.filter(app => installedApps.has(app.id)).map((app, index) => (
+        <div className="p-4 h-full w-full">
+          {desktopApps.map((app) => (
             <DesktopIcon
               key={app.id}
               label={app.label}
               icon={app.icon}
-              onClick={(e) => openWindow(app.id, e)}
-              index={index}
+              position={app.position}
+              onMouseDown={(e) => handleIconMouseDown(e, app.id)}
+              isDragging={draggedAppIdRef.current === app.id}
             />
           ))}
         </div>
@@ -333,22 +434,6 @@ const Desktop: React.FC = () => {
             </div>
         </div>
       </footer>
-       <style>{`
-        @keyframes icon-appear {
-            from {
-                opacity: 0;
-                transform: scale(0.8) translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-        .animate-icon-appear {
-            animation: icon-appear 0.4s ease-out forwards;
-            opacity: 0; /* Start hidden */
-        }
-      `}</style>
     </div>
   );
 };

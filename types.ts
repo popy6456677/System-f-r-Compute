@@ -3,6 +3,7 @@ export enum BootState {
   PRODUCTION_LOGO,
   BOOTING,
   WELCOME,
+  PORTAL,
   DESKTOP,
 }
 
@@ -14,4 +15,11 @@ export interface WindowInstance {
     zIndex: number;
     position: { x: number; y: number };
     size: { width: number, height: number };
+}
+
+export interface DesktopAppConfig {
+  id: WindowType;
+  label: string;
+  icon: React.ReactNode;
+  position: { x: number; y: number };
 }
